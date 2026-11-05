@@ -47,8 +47,9 @@ function send(res, status, body) {
 export default async function handler(req, res) {
   if (req.method !== "POST") return send(res, 405, { error: "POST만 받아요." });
 
-  const pw = process.env.APP_PASSWORD;
-  if (pw && req.headers["x-app-key"] !== pw) return send(res, 401, { error: "앱 비밀번호가 맞지 않아요." });
+  const pw = (process.env.APP_PASSWORD || "").trim();
+  const given = decodeURIComponent(String(req.headers["x-app-key"] || "")).trim();
+  if (pw && given !== pw) return send(res, 401, { error: "앱 비밀번호가 맞지 않아요." });
   if (!process.env.GEMINI_API_KEY) return send(res, 500, { error: "서버에 GEMINI_API_KEY가 설정되지 않았어요." });
 
   const body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : (req.body || {});

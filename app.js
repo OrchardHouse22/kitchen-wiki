@@ -27,7 +27,7 @@ function EXAMPLE(){ return {
 let query = "";
 const servingsFor = {};
 const draft = { url: "", text: "", images: [] };
-let busy = false, addErr = "", ctl = null;
+let busy = false, addErr = "", ctl = null, needPw = false;
 
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 function toast(msg){
@@ -256,6 +256,8 @@ function renderAdd(){
         <div class="thumbs" id="thumbs"></div>
       </div>
       <div class="err" id="aErr">${esc(addErr)}</div>
+      ${needPw && !busy ? `<label class="field"><span class="label">앱 비밀번호</span>
+        <input id="aPw" type="password" placeholder="Vercel에 넣은 APP_PASSWORD" autocomplete="current-password"></label>` : ""}
       ${busy
         ? `<div class="status"><div class="spin"></div><span>${yt ? "영상을 보고 정리하는 중이에요. 길면 1분쯤 걸려요." : "재료와 순서를 정리하고 있어요."}</span></div>
            <button class="btn ghost" id="aStop">그만두기</button>`
@@ -267,7 +269,11 @@ function renderAdd(){
   document.getElementById("aImg").onchange = e => { addImages([...e.target.files]); e.target.value = ""; };
   drawThumbs();
   if (busy) document.getElementById("aStop").onclick = () => ctl?.abort();
-  else document.getElementById("aGo").onclick = ingest;
+  else document.getElementById("aGo").onclick = () => {
+    const pw = document.getElementById("aPw");
+    if (pw && pw.value.trim()) { save(PW, pw.value.trim()); needPw = false; }
+    ingest();
+  };
 }
 function addImages(files){
   for (const f of files) if (f.type.startsWith("image/") && draft.images.length < 6) draft.images.push(f);
@@ -317,17 +323,17 @@ async function ingest(){
     const images = await Promise.all(draft.images.map(shrink));
     const res = await fetch("/api/extract", {
       method: "POST", signal: ctl.signal,
-      headers: { "Content-Type": "application/json", "x-app-key": load(PW, "") },
+      headers: { "Content-Type": "application/json", "x-app-key": encodeURIComponent(String(load(PW, "")).trim()) },
       body: JSON.stringify({ url, text, images }),
     });
     const out = await res.json().catch(() => ({ error: "서버 응답을 읽지 못했어요." }));
     if (!res.ok || out.error) {
-      if (res.status === 401) { addErr = "앱 비밀번호가 필요해요. 설정에서 입력해 주세요."; }
+      if (res.status === 401) { needPw = true; addErr = load(PW, "") ? "앱 비밀번호가 맞지 않아요. 아래에 다시 입력하고 정리하기를 눌러 주세요." : "앱 비밀번호가 필요해요. 아래에 입력하고 정리하기를 눌러 주세요."; }
       else addErr = out.error || `오류가 났어요 (${res.status})`;
       throw null;
     }
     const r = { ...out, id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), sourceUrl: url, createdAt: Date.now() };
-    recipes.push(r); persist();
+    recipes.push(r); persist(); needPw = false;
     draft.url = ""; draft.text = ""; draft.images = [];
     busy = false;
     location.hash = "r-" + r.id;
@@ -355,7 +361,7 @@ function renderSettings(){
       <label class="btn ghost" for="sImport" style="text-align:center;box-sizing:border-box">백업 파일 불러오기</label>
       <input id="sImport" type="file" accept="application/json,.json" hidden>
     </div>`;
-  document.getElementById("sPwSave").onclick = () => { save(PW, document.getElementById("sPw").value); toast("비밀번호를 저장했어요"); };
+  document.getElementById("sPwSave").onclick = () => { save(PW, document.getElementById("sPw").value.trim()); toast("비밀번호를 저장했어요"); };
   document.getElementById("sExport").onclick = () => {
     const blob = new Blob([JSON.stringify({ app: "kitchen-wiki", version: 1, recipes }, null, 2)], { type: "application/json" });
     const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
