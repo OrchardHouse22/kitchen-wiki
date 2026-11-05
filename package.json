@@ -1,0 +1,6 @@
+{
+  "name": "kitchen-wiki",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=18" }
+}

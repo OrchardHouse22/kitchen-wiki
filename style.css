@@ -1,0 +1,106 @@
+/* Layout: single phone column; list → recipe wiki page → full-screen cook mode. Basil green on a faintly green paper. */
+:root{
+  --bg:#F5F7F2; --surface:#FFFFFF; --ink:#1C2420; --muted:#65706A; --line:#DCE2D8;
+  --accent:#2E6A4E; --accent-ink:#FFFFFF; --accent-soft:#E2EEE6; --danger:#B3402E;
+  --display:"Gowun Batang", "AppleMyungjo", "Noto Serif KR", serif;
+  --body:"Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111613; --surface:#19201C; --ink:#E7ECE6; --muted:#98A39B; --line:#2A332D;
+  --accent:#86C7A2; --accent-ink:#0F1A14; --accent-soft:#1E2D24; --danger:#E58A78; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111613; --surface:#19201C; --ink:#E7ECE6; --muted:#98A39B; --line:#2A332D;
+  --accent:#86C7A2; --accent-ink:#0F1A14; --accent-soft:#1E2D24; --danger:#E58A78; color-scheme:dark}
+
+html,body{background:var(--bg)}
+body{color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:env(safe-area-inset-top,0px) calc(96px + env(safe-area-inset-bottom,0px))}
+.wrap{max-width:560px;margin:0 auto}
+h1,h2{font-family:var(--display);font-weight:700;text-wrap:balance;margin:0}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.muted{color:var(--muted)}
+.label{font-size:12px;letter-spacing:.08em;color:var(--muted);font-weight:500}
+
+/* header */
+.top{display:flex;align-items:center;gap:12px;padding-block:20px 12px}
+.top h1{font-size:26px;flex:1}
+.iconbtn{border:0;background:none;padding:8px;margin-left:-8px;border-radius:8px;color:var(--ink);font-size:15px}
+
+/* list */
+.search{width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.list{display:flex;flex-direction:column;margin-top:12px}
+.item{display:flex;flex-direction:column;gap:4px;padding:14px 2px;border-bottom:1px solid var(--line);text-decoration:none;color:inherit}
+.item h2{font-size:19px}
+.meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
+.chip{background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:1px 9px;font-size:12.5px;font-weight:500}
+.src{font-size:12px;border:1px solid var(--line);border-radius:6px;padding:0 6px}
+.empty{padding:40px 8px;text-align:center;color:var(--muted)}
+.fab{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(20px + env(safe-area-inset-bottom,0px));
+  background:var(--accent);color:var(--accent-ink);border:0;border-radius:999px;padding:14px 20px;font-weight:700;
+  box-shadow:0 6px 18px rgba(0,0,0,.18);text-decoration:none}
+
+/* recipe page */
+.title{font-size:28px;line-height:1.3;margin-top:4px}
+.section{margin-top:28px;display:flex;flex-direction:column;gap:10px}
+.section h3{margin:0;font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px}
+.section h3::after{content:"";flex:1;height:1px;background:var(--line)}
+.scaler{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-top:16px}
+.stepper{display:flex;align-items:center;gap:4px}
+.stepper button{width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--bg);font-size:20px;line-height:1}
+.stepper output{min-width:64px;text-align:center;font-weight:700;font-size:18px;font-variant-numeric:tabular-nums}
+.ings{list-style:none;margin:0;padding:0}
+.ings li{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px dashed var(--line)}
+.ings .q{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+.ings .q.changed{color:var(--accent)}
+.group{font-size:13px;color:var(--muted);margin-top:8px}
+.steps{margin:0;padding:0;list-style:none;counter-reset:s;display:flex;flex-direction:column;gap:14px}
+.steps li{counter-increment:s;display:grid;grid-template-columns:28px 1fr;gap:10px}
+.steps li::before{content:counter(s);font-family:var(--display);font-weight:700;color:var(--accent);font-size:18px;line-height:1.5}
+.steps li>div{min-width:0}
+b.ing{font-weight:700;background:var(--accent-soft);border-radius:4px;padding:0 4px;white-space:nowrap}
+.btn{border:0;border-radius:12px;padding:14px 18px;font-weight:700;background:var(--accent);color:var(--accent-ink);width:100%}
+.btn.ghost{background:none;border:1px solid var(--line);color:var(--ink)}
+.btn.danger{background:none;border:1px solid var(--danger);color:var(--danger)}
+.btn:disabled{opacity:.5;cursor:default}
+.row{display:flex;gap:8px}
+.tips{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:15px}
+a{color:var(--accent)}
+details summary{cursor:pointer;color:var(--muted);font-size:14px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field input,.field textarea{box-sizing:border-box;width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.field textarea{min-height:150px;resize:vertical}
+.thumbs{display:flex;gap:8px;flex-wrap:wrap}
+.thumbs div{position:relative}
+.thumbs img{width:72px;height:96px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+.thumbs button{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;border:0;background:var(--ink);color:var(--bg);font-size:12px;line-height:1}
+.drop{border:1.5px dashed var(--line);border-radius:12px;padding:16px;text-align:center;color:var(--muted);font-size:14px;cursor:pointer;display:block}
+.note{font-size:13.5px;color:var(--muted)}
+.err{color:var(--danger);font-size:14px}
+.status{display:flex;gap:10px;align-items:center;font-size:14px;color:var(--muted)}
+.spin{width:16px;height:16px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.badge{font-size:11px;background:var(--line);color:var(--muted);border-radius:4px;padding:0 5px}
+
+/* cook mode */
+.cook{position:fixed;inset:0;background:var(--bg);z-index:50;display:flex;flex-direction:column;
+  padding:calc(12px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.cook-top{display:flex;justify-content:space-between;align-items:center}
+.bar{height:4px;background:var(--line);border-radius:4px;margin-top:10px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);transition:width .25s}
+.cook-body{flex:1;overflow:auto;display:flex;flex-direction:column;justify-content:center;gap:20px;padding-block:20px;max-width:560px;width:100%;margin:0 auto}
+.cook-num{font-family:var(--display);color:var(--accent);font-size:20px}
+.cook-text{font-size:24px;line-height:1.55;font-weight:500}
+.cook-ings{display:flex;flex-direction:column;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.cook-ings div{display:flex;justify-content:space-between;gap:12px}
+.timer{align-self:flex-start;border:1px solid var(--accent);color:var(--accent);background:none;border-radius:999px;padding:8px 16px;font-weight:700;font-variant-numeric:tabular-nums}
+.timer.run{background:var(--accent);color:var(--accent-ink)}
+.cook-nav{display:grid;grid-template-columns:1fr 2fr;gap:10px;max-width:560px;width:100%;margin:0 auto}
+@media (prefers-reduced-motion: reduce){.spin{animation:none}.bar i{transition:none}}
+
+.top .iconbtn.right{margin:0 -8px 0 0;color:var(--muted)}
+.stack{display:flex;flex-direction:column;gap:12px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:14px;z-index:60}
+.yt{display:flex;gap:8px;align-items:center;font-size:13.5px;color:var(--accent)}
