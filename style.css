@@ -154,3 +154,6 @@ select{font:inherit;color:inherit;box-sizing:border-box;width:100%;padding:12px;
 .suggest{display:flex;flex-direction:column;gap:4px}
 .suggest:empty{display:none}
 .suggest button{text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 12px}
+.presets{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.presets button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:13.5px;font-variant-numeric:tabular-nums}
+.presets button.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}

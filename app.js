@@ -41,7 +41,7 @@ function toast(msg){
 }
 
 /* ---------- quantities ---------- */
-const FR = [[0, ""], [0.25, "¼"], [1 / 3, "⅓"], [0.5, "½"], [2 / 3, "⅔"], [0.75, "¾"], [1, ""]];
+const FR = [[0, ""], [0.125, "⅛"], [0.25, "¼"], [1 / 3, "⅓"], [0.5, "½"], [2 / 3, "⅔"], [0.75, "¾"], [1, ""]];
 function fmtQty(q, unit){
   if (q == null || q === "" || isNaN(q)) return "";
   q = Number(q);
@@ -60,6 +60,7 @@ function fmtQty(q, unit){
 function ingAmount(ing, ratio){
   const n = fmtQty(ing.qty == null ? null : Number(ing.qty) * ratio, ing.unit);
   if (!n) return ing.note || ing.unit || "";
+  if (n === "조금") return "아주 조금";
   return n + (ing.unit || "") + (ing.note ? ` (${ing.note})` : "");
 }
 const ratioOf = r => (servingsFor[r.id] ?? r.servings ?? 1) / (r.servings || 1);
@@ -156,6 +157,8 @@ function renderRecipe(id){
         <button id="plus" aria-label="인분 늘리기">＋</button>
       </div>
     </div>
+    <div class="presets">${[...new Set([0.25, 0.5, 1, 2, 3, base / 2, base * 2])].filter(v => v >= 0.25 && v <= 20).sort((a, b) => a - b)
+      .map(v => `<button data-sv="${v}" class="${v === cur ? "on" : ""}">${v === base / 2 ? "원본 절반 · " : v === base * 2 ? "원본 2배 · " : ""}${fmtQty(v) || v}인분</button>`).join("")}</div>
     <div class="section"><h3>재료</h3><ul class="ings">${ings}</ul></div>
     <div class="section"><h3>조리 순서</h3><ol class="steps">${(r.steps || []).map(s => `<li><div>${stepHtml(s, r, ratio)}</div></li>`).join("")}</ol></div>
     ${r.tips ? `<div class="section"><h3>팁</h3><div class="tips">${esc(r.tips)}</div></div>` : ""}
@@ -174,9 +177,16 @@ function renderRecipe(id){
         </div>
       </details>
     </div>`;
-  const step = d => { servingsFor[r.id] = Math.max(0.5, Math.round(((servingsFor[r.id] ?? base) + d) * 2) / 2); renderRecipe(id); };
-  document.getElementById("minus").onclick = () => step((servingsFor[r.id] ?? base) <= 1 ? -0.5 : -1);
-  document.getElementById("plus").onclick = () => step((servingsFor[r.id] ?? base) < 1 ? 0.5 : 1);
+  // Servings ladder: quarter steps below 1, half steps to 2, whole numbers after.
+  const LADDER = [0.25, 0.5, 0.75, 1, 1.5, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20];
+  const step = dir => {
+    const c = servingsFor[r.id] ?? base;
+    const next = dir < 0 ? [...LADDER].reverse().find(v => v < c - 1e-9) : LADDER.find(v => v > c + 1e-9);
+    if (next != null) { servingsFor[r.id] = next; renderRecipe(id); }
+  };
+  document.getElementById("minus").onclick = () => step(-1);
+  document.getElementById("plus").onclick = () => step(1);
+  $app.querySelectorAll("[data-sv]").forEach(b => b.onclick = () => { servingsFor[r.id] = +b.dataset.sv; renderRecipe(id); });
   document.getElementById("startCook").onclick = () => openCook(r);
   document.getElementById("back").onclick = () => { if (history.length > 1) history.back(); else location.hash = "recipes"; };
   document.getElementById("ateBtn").onclick = () => openAteForm(r, document.getElementById("ateForm"), () => renderRecipe(id));
